@@ -14,12 +14,12 @@ services:
       - UMASK_SET=022 #optional
       - PLEX_CLAIM= #optional
     volumes:
-      - /home/leandrensen/Desktop/mediaserver/plex/config:/config
-      - /home/leandrensen/Desktop/mediaserver/media/peliculas:/peliculas
-      - /home/leandrensen/Desktop/mediaserver/media/series:/series
-      - /home/leandrensen/Desktop/mediaserver/media/documentales:/documentales
-      - /home/leandrensen/Desktop/mediaserver/media/anime:/anime
-      - /home/leandrensen/Desktop/mediaserver/media/musica:/musica
+      - /mnt/sdc/mediaserver/plex/config:/config
+      - /mnt/sdc/mediaserver/media/peliculas:/peliculas
+      - /mnt/sdc/mediaserver/media/series:/series
+      - /mnt/sdc/mediaserver/media/documentales:/documentales
+      - /mnt/sdc/mediaserver/media/anime:/anime
+      - /mnt/sdc/mediaserver/media/musica:/musica
     restart: unless-stopped
   tautulli:
     image: linuxserver/tautulli
@@ -29,8 +29,8 @@ services:
       - PGID=1000
       - TZ=America/Argentina/Buenos_Aires
     volumes:
-      - /home/leandrensen/Desktop/mediaserver/tautulli/config:/config
-      - /home/leandrensen/Desktop/mediaserver/plex/config/Library/Application\ Support/Plex\ Media\ Server/Logs:/logs:ro
+      - /mnt/sdc/mediaserver/tautulli/config:/config
+      - /mnt/sdc/mediaserver/plex/config/Library/Application\ Support/Plex\ Media\ Server/Logs:/logs:ro
     ports:
       - 8181:8181
     restart: unless-stopped
@@ -46,10 +46,10 @@ services:
       - TZ=America/Argentina/Buenos_Aires
       - UMASK_SET=022 #optional
     volumes:
-      - /home/leandrensen/Desktop/mediaserver/sonarr/config:/config
-      - /home/leandrensen/Desktop/downloads:/downloads 
-      - /home/leandrensen/Desktop/mediaserver/media/series:/series
-      - /home/leandrensen/Desktop/mediaserver/media/anime:/anime
+      - /mnt/sdc/mediaserver/sonarr/config:/config
+      - /mnt/sdc/downloads:/downloads 
+      - /mnt/sdc/mediaserver/media/series:/series
+      - /mnt/sdc/mediaserver/media/anime:/anime
     ports:
       - 8989:8989
     restart: unless-stopped
@@ -62,10 +62,10 @@ services:
       - TZ=America/Argentina/Buenos_Aires
       - UMASK_SET=022 #optional 
     volumes:
-      - /home/leandrensen/Desktop/mediaserver/radarr/config:/config
-      - /home/leandrensen/Desktop/downloads:/downloads 
-      - /home/leandrensen/Desktop/mediaserver/media/peliculas:/peliculas
-      - /home/leandrensen/Desktop/mediaserver/media/documentales:/documentales 
+      - /mnt/sdc/mediaserver/radarr/config:/config
+      - /mnt/sdc/downloads:/downloads 
+      - /mnt/sdc/mediaserver/media/peliculas:/peliculas
+      - /mnt/sdc/mediaserver/media/documentales:/documentales 
     ports:
       - 7878:7878
     restart: unless-stopped
@@ -78,9 +78,9 @@ services:
       - TZ=America/Argentina/Buenos_Aires
       - UMASK_SET=022 #optional 
     volumes:
-      - /home/leandrensen/Desktop/mediaserver/lidarr/config:/config
-      - /home/leandrensen/Desktop/downloads:/downloads
-      - /home/leandrensen/Desktop/mediaserver/media/musica:/musica
+      - /mnt/sdc/mediaserver/lidarr/config:/config
+      - /mnt/sdc/downloads:/downloads
+      - /mnt/sdc/mediaserver/media/musica:/musica
     ports:
       - 8686:8686
     restart: unless-stopped
@@ -96,8 +96,8 @@ services:
       - TZ=America/Argentina/Buenos_Aires
       - RUN_OPTS=run options here #optional
     volumes:
-      - /home/leandrensen/Desktop/mediaserver/jackett/config:/config
-      - /home/leandrensen/Desktop/mediaserver/jackett/torrentfiles:/downloads
+      - /mnt/sdc/mediaserver/jackett/config:/config
+      - /mnt/sdc/mediaserver/jackett/torrentfiles:/downloads
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 9117:9117
@@ -116,9 +116,9 @@ services:
       - UMASK_SET=022 #optional
       - DELUGE_LOGLEVEL=error #optional
     volumes:
-      - /home/leandrensen/Desktop/mediaserver/deluge/config:/config
-      - /home/leandrensen/Desktop/downloads:/downloads
-      - /home/leandrensen/Desktop/mediaserver/jackett/torrentfiles:/torrentfiles
+      - /mnt/sdc/mediaserver/deluge/config:/config
+      - /mnt/sdc/downloads:/downloads
+      - /mnt/sdc/mediaserver/jackett/torrentfiles:/torrentfiles
     ports:
       - 9000:9000
     restart: unless-stopped
