@@ -114,7 +114,7 @@ services:
       - TZ=America/Argentina/Buenos_Aires
       - BASE_URL=/ombi #optional
     volumes:
-      - ${DIR_MEDIASERVER}/media/ombi/config:/config
+      - ${DIR_MEDIASERVER}/ombi/config:/config
     ports:
       - 3579:3579
     restart: unless-stopped
