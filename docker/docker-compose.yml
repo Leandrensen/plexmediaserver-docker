@@ -2,7 +2,6 @@ version: "2"
 services:
 
   #Plex
-
   plex:
     image: linuxserver/plex
     container_name: plex
@@ -21,22 +20,8 @@ services:
       - ${DIR_MEDIASERVER}/media/anime:/anime
       - ${DIR_MEDIASERVER}/media/musica:/musica
     restart: unless-stopped
-  tautulli:
-    image: linuxserver/tautulli
-    container_name: tautulli
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Argentina/Buenos_Aires
-    volumes:
-      - ${DIR_MEDIASERVER}/tautulli/config:/config
-      - ${DIR_MEDIASERVER}/plex/config/Library/Application\ Support/Plex\ Media\ Server/Logs:/logs:ro
-    ports:
-      - 8181:8181
-    restart: unless-stopped
 
   #Searchers 
-
   sonarr:
     image: linuxserver/sonarr
     container_name: sonarr
@@ -53,6 +38,7 @@ services:
     ports:
       - 8989:8989
     restart: unless-stopped
+
   radarr:
     image: linuxserver/radarr
     container_name: radarr
@@ -69,6 +55,7 @@ services:
     ports:
       - 7878:7878
     restart: unless-stopped
+
   lidarr:
     image: linuxserver/lidarr
     container_name: lidarr
@@ -86,7 +73,6 @@ services:
     restart: unless-stopped
   
   #Indexers
-
   jackett:
     image: linuxserver/jackett
     container_name: jackett
@@ -103,8 +89,37 @@ services:
       - 9117:9117
     restart: unless-stopped
 
-  #Downloaders
+  #Statistics
+  tautulli:
+    image: linuxserver/tautulli
+    container_name: tautulli
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Argentina/Buenos_Aires
+    volumes:
+      - ${DIR_MEDIASERVER}/tautulli/config:/config
+      - ${DIR_MEDIASERVER}/plex/config/Library/Application\ Support/Plex\ Media\ Server/Logs:/logs:ro
+    ports:
+      - 8181:8181
+    restart: unless-stopped
 
+  #Requests
+  ombi:
+    image: linuxserver/ombi
+    container_name: ombi
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Argentina/Buenos_Aires
+      - BASE_URL=/ombi #optional
+    volumes:
+      - ${DIR_MEDIASERVER}/media/ombi/config:/config
+    ports:
+      - 3579:3579
+    restart: unless-stopped
+
+  #Downloaders
   deluge:
     image: linuxserver/deluge
     container_name: deluge
@@ -122,3 +137,17 @@ services:
     ports:
       - 9000:9000
     restart: unless-stopped
+
+  #Media File Organizer
+  filebot:
+    image: coppit/filebot
+    container_name: filebot
+    restart: always
+    volumes:
+      - ${DIR_MEDIASERVER}/filebot/config:/config
+      - ${DIR_MEDIASERVER}/media:/output
+      - ${DIR_DOWNLOADS}:/input
+    environment:
+      PUID: ${userid}
+      PGID: ${groupid}
+      TZ: ${time}
