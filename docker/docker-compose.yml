@@ -148,6 +148,6 @@ services:
       - ${DIR_MEDIASERVER}/media:/output
       - ${DIR_DOWNLOADS}:/input
     environment:
-      PUID=${USER_ID}
-      PGID=${GROUP_ID}
-      TZ=${TIME_ZONE}
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIME_ZONE}
