@@ -7,8 +7,8 @@ services:
     container_name: plex
     network_mode: host
     environment:
-      - PUID=1000
-      - PGID=1000
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
       - VERSION=docker
       - UMASK_SET=022 #optional
       - PLEX_CLAIM= #optional
@@ -26,9 +26,9 @@ services:
     image: linuxserver/sonarr
     container_name: sonarr
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Argentina/Buenos_Aires
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIME_ZONE}
       - UMASK_SET=022 #optional
     volumes:
       - ${DIR_MEDIASERVER}/sonarr/config:/config
@@ -43,9 +43,9 @@ services:
     image: linuxserver/radarr
     container_name: radarr
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Argentina/Buenos_Aires
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIME_ZONE}
       - UMASK_SET=022 #optional 
     volumes:
       - ${DIR_MEDIASERVER}/radarr/config:/config
@@ -60,9 +60,9 @@ services:
     image: linuxserver/lidarr
     container_name: lidarr
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Argentina/Buenos_Aires
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIME_ZONE}
       - UMASK_SET=022 #optional 
     volumes:
       - ${DIR_MEDIASERVER}/lidarr/config:/config
@@ -77,9 +77,9 @@ services:
     image: linuxserver/jackett
     container_name: jackett
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Argentina/Buenos_Aires
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIME_ZONE}
       - RUN_OPTS=run options here #optional
     volumes:
       - ${DIR_MEDIASERVER}/jackett/config:/config
@@ -94,9 +94,9 @@ services:
     image: linuxserver/tautulli
     container_name: tautulli
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Argentina/Buenos_Aires
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIME_ZONE}
     volumes:
       - ${DIR_MEDIASERVER}/tautulli/config:/config
       - ${DIR_MEDIASERVER}/plex/config/Library/Application\ Support/Plex\ Media\ Server/Logs:/logs:ro
@@ -109,9 +109,9 @@ services:
     image: linuxserver/ombi
     container_name: ombi
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Argentina/Buenos_Aires
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIME_ZONE}
       - BASE_URL=/ombi #optional
     volumes:
       - ${DIR_MEDIASERVER}/ombi/config:/config
@@ -125,9 +125,9 @@ services:
     container_name: deluge
     network_mode: host
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Argentina/Buenos_Aires
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIME_ZONE}
       - UMASK_SET=022 #optional
       - DELUGE_LOGLEVEL=error #optional
     volumes:
@@ -148,6 +148,6 @@ services:
       - ${DIR_MEDIASERVER}/media:/output
       - ${DIR_DOWNLOADS}:/input
     environment:
-      PUID: ${userid}
-      PGID: ${groupid}
-      TZ: ${time}
+      PUID=${USER_ID}
+      PGID=${GROUP_ID}
+      TZ=${TIME_ZONE}
