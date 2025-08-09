@@ -2,6 +2,8 @@
 
 A comprehensive Docker Compose configuration for a complete media server stack optimized for Spanish content with English fallbacks.
 
+> Español (Argentina): Lea la guía traducida en `README.es-AR.md`.
+
 ## 📋 **Services Included**
 
 ### 🎥 **Media Servers**
