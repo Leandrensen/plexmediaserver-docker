@@ -1,15 +1,20 @@
 #!/bin/bash
 
+set -euo pipefail
+
+TARGET_DIR="${1:-.}"
+cd "$TARGET_DIR"
+
+shopt -s nullglob nocaseglob
 for file in *.mkv *.mp4 *.wmv *.avi; do
-        if [ -f "$file" ] # does file exist?
-        then
-                dir=$(echo "${file%.*}") # extract filename from filename.extention
-                if [ "$dir" ] # check if string found
-                then
-                        mkdir -p "$dir"  # create dir
-                        mv "$file" "$dir"     # move file into new dir
-                else
-                        echo "INCORRECT FILE FORMAT: \""$file"\"" # print error if file format is unexpected
-                fi
-        fi
+  if [[ -f "$file" ]]; then
+    dirname="${file%.*}"
+    if [[ -n "$dirname" ]]; then
+      mkdir -p "$dirname"
+      mv -n "$file" "$dirname/"
+      echo "Moved: $file -> $dirname/"
+    else
+      echo "Skipping unexpected file name: $file" >&2
+    fi
+  fi
 done

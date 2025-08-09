@@ -1,0 +1,17 @@
+{
+  "name": "1337x",
+  "implementation": "1337x",
+  "configContract": "1337xSettings",
+  "protocol": "torrent",
+  "fields": [
+    { "name": "baseUrl", "value": "https://1337x.to/" },
+    { "name": "type", "value": "public" },
+    { "name": "downloadLink", "value": "itorrents" },
+    { "name": "downloadLinkFallback", "value": "magnet" },
+    { "name": "categories", "value": "1000,2000,3000,4000,5000,7000,8000" }
+  ],
+  "enableRss": true,
+  "enableAutomaticSearch": true,
+  "enableInteractiveSearch": true
+}
+

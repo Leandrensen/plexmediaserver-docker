@@ -1,7 +1,18 @@
-version: "2"
+version: "3.8"
+
+# Networks
+networks:
+  mediaserver:
+    name: mediaserver
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${DOCKER_NETWORK_SUBNET:-172.20.0.0/16}
+          gateway: ${DOCKER_NETWORK_GATEWAY:-172.20.0.1}
+
 services:
 
-  #Plex
+  #Media Servers
   plex:
     image: linuxserver/plex
     container_name: plex
@@ -10,8 +21,9 @@ services:
       - PUID=${USER_ID}
       - PGID=${GROUP_ID}
       - VERSION=docker
-      - UMASK_SET=022 #optional
-      - PLEX_CLAIM= #optional
+      - UMASK=022 #optional
+      - TZ=${TIME_ZONE}
+      - PLEX_CLAIM=${PLEX_CLAIM_TOKEN} #optional - get from https://plex.tv/claim
     volumes:
       - ${DIR_MEDIASERVER}/plex/config:/config
       - ${DIR_MEDIASERVER}/media/peliculas:/peliculas
@@ -21,7 +33,59 @@ services:
       - ${DIR_MEDIASERVER}/media/musica:/musica
     restart: unless-stopped
 
-  #Searchers 
+  # Emby - Alternative Media Server (Disabled by default)
+  # Uncomment to enable Emby alongside Plex
+  # emby:
+  #   image: linuxserver/emby
+  #   container_name: emby
+  #   environment:
+  #     - PUID=${USER_ID}
+  #     - PGID=${GROUP_ID}
+  #     - TZ=${TIME_ZONE}
+  #     - UMASK=022
+  #   volumes:
+  #     - ${DIR_MEDIASERVER}/emby/config:/config
+  #     - ${DIR_MEDIASERVER}/media/peliculas:/data/movies
+  #     - ${DIR_MEDIASERVER}/media/series:/data/tvshows
+  #     - ${DIR_MEDIASERVER}/media/documentales:/data/documentaries
+  #     - ${DIR_MEDIASERVER}/media/anime:/data/anime
+  #     - ${DIR_MEDIASERVER}/media/musica:/data/music
+  #   ports:
+  #     - 8096:8096
+  #     - 8920:8920
+  #   restart: unless-stopped
+  #   networks:
+  #     - mediaserver
+
+  #Searchers
+  # Movies
+  radarr:
+    image: linuxserver/radarr
+    container_name: radarr
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIME_ZONE}
+      - UMASK=022
+    volumes:
+      - ${DIR_MEDIASERVER}/radarr/config:/config
+      - ${DIR_DOWNLOADS}:/downloads
+      - ${DIR_MEDIASERVER}/media/peliculas:/peliculas
+      - ${DIR_MEDIASERVER}/media/documentales:/documentales
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+    networks:
+      - mediaserver
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:7878/"]
+      interval: 30s
+      timeout: 5s
+      retries: 20
+    depends_on:
+      - prowlarr
+
+  # Series
   sonarr:
     image: linuxserver/sonarr
     container_name: sonarr
@@ -29,7 +93,7 @@ services:
       - PUID=${USER_ID}
       - PGID=${GROUP_ID}
       - TZ=${TIME_ZONE}
-      - UMASK_SET=022 #optional
+      - UMASK=022
     volumes:
       - ${DIR_MEDIASERVER}/sonarr/config:/config
       - ${DIR_DOWNLOADS}:/downloads
@@ -38,24 +102,48 @@ services:
     ports:
       - 8989:8989
     restart: unless-stopped
+    networks:
+      - mediaserver
+    depends_on:
+      - prowlarr
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8989/"]
+      interval: 30s
+      timeout: 5s
+      retries: 20
 
-  radarr:
-    image: linuxserver/radarr
-    container_name: radarr
+  # Subtitles
+  bazarr:
+    image: linuxserver/bazarr
+    container_name: bazarr
     environment:
       - PUID=${USER_ID}
       - PGID=${GROUP_ID}
       - TZ=${TIME_ZONE}
-      - UMASK_SET=022 #optional 
+      - UMASK=022
+      # Bazarr subtitle language configuration
+      - BAZARR_LANGUAGES=es,es-MX,es-AR,en
     volumes:
-      - ${DIR_MEDIASERVER}/radarr/config:/config
-      - ${DIR_DOWNLOADS}:/downloads 
-      - ${DIR_MEDIASERVER}/media/peliculas:/peliculas
-      - ${DIR_MEDIASERVER}/media/documentales:/documentales 
+      - ${DIR_MEDIASERVER}/bazarr/config:/config
+      - ${DIR_MEDIASERVER}/media/peliculas:/movies
+      - ${DIR_MEDIASERVER}/media/series:/tv
+      - ${DIR_MEDIASERVER}/media/documentales:/documentaries
+      - ${DIR_MEDIASERVER}/media/anime:/anime
     ports:
-      - 7878:7878
+      - 6767:6767
     restart: unless-stopped
+    networks:
+      - mediaserver
+    depends_on:
+      - sonarr
+      - radarr
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:6767/"]
+      interval: 30s
+      timeout: 5s
+      retries: 20
 
+  # Music
   lidarr:
     image: linuxserver/lidarr
     container_name: lidarr
@@ -63,7 +151,7 @@ services:
       - PUID=${USER_ID}
       - PGID=${GROUP_ID}
       - TZ=${TIME_ZONE}
-      - UMASK_SET=022 #optional 
+      - UMASK=022
     volumes:
       - ${DIR_MEDIASERVER}/lidarr/config:/config
       - ${DIR_DOWNLOADS}:/downloads
@@ -71,23 +159,55 @@ services:
     ports:
       - 8686:8686
     restart: unless-stopped
-  
+    networks:
+      - mediaserver
+    depends_on:
+      - prowlarr
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8686/"]
+      interval: 30s
+      timeout: 5s
+      retries: 20
+
   #Indexers
-  jackett:
-    image: linuxserver/jackett
-    container_name: jackett
+  prowlarr:
+    image: linuxserver/prowlarr
+    container_name: prowlarr
     environment:
       - PUID=${USER_ID}
       - PGID=${GROUP_ID}
       - TZ=${TIME_ZONE}
-      - RUN_OPTS=run options here #optional
+      - UMASK=022
     volumes:
-      - ${DIR_MEDIASERVER}/jackett/config:/config
-      - ${DIR_MEDIASERVER}/jackett/torrentfiles:/downloads
-      - /etc/localtime:/etc/localtime:ro
+      - ${DIR_MEDIASERVER}/prowlarr/config:/config
     ports:
-      - 9117:9117
+      - 9696:9696
     restart: unless-stopped
+    networks:
+      - mediaserver
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9696/"]
+      interval: 30s
+      timeout: 5s
+      retries: 20
+
+  # Anti-bot solver for indexers behind Cloudflare
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - TZ=${TIME_ZONE}
+      - LOG_LEVEL=info
+    ports:
+      - 8191:8191
+    restart: unless-stopped
+    networks:
+      - mediaserver
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8191/"]
+      interval: 30s
+      timeout: 5s
+      retries: 20
 
   #Statistics
   tautulli:
@@ -103,6 +223,15 @@ services:
     ports:
       - 8181:8181
     restart: unless-stopped
+    networks:
+      - mediaserver
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8181/"]
+      interval: 30s
+      timeout: 5s
+      retries: 20
+    # Note: Plex uses host networking, so Tautulli connects via host IP
+    # No direct container dependency needed
 
   #Requests
   ombi:
@@ -112,42 +241,152 @@ services:
       - PUID=${USER_ID}
       - PGID=${GROUP_ID}
       - TZ=${TIME_ZONE}
-      - BASE_URL=/ombi #optional
+      - BASE_URL=/ombi
     volumes:
       - ${DIR_MEDIASERVER}/ombi/config:/config
     ports:
       - 3579:3579
     restart: unless-stopped
+    networks:
+      - mediaserver
+    depends_on:
+      - sonarr
+      - radarr
+    # Note: Ombi will connect to Plex via host IP (not container name)
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3579/"]
+      interval: 30s
+      timeout: 5s
+      retries: 20
 
   #Downloaders
   deluge:
     image: linuxserver/deluge
     container_name: deluge
-    network_mode: host
     environment:
       - PUID=${USER_ID}
       - PGID=${GROUP_ID}
       - TZ=${TIME_ZONE}
-      - UMASK_SET=022 #optional
-      - DELUGE_LOGLEVEL=error #optional
+      - UMASK=022
+      - DELUGE_LOGLEVEL=error
     volumes:
       - ${DIR_MEDIASERVER}/deluge/config:/config
       - ${DIR_DOWNLOADS}:/downloads
-      - ${DIR_MEDIASERVER}/jackett/torrentfiles:/torrentfiles
+      - ${DIR_DOWNLOADS}/incomplete:/downloads/incomplete
+      - ${DIR_DOWNLOADS}/complete:/downloads/complete
     ports:
-      - 9000:9000
+      - 8112:8112  # Deluge Web UI
+      - 58846:58846  # Deluge Daemon
+      - 58946:58946  # Deluge Incoming TCP
+      - 58946:58946/udp  # Deluge Incoming UDP
     restart: unless-stopped
+    networks:
+      - mediaserver
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8112/"]
+      interval: 30s
+      timeout: 5s
+      retries: 20
+
+  # IRC autobot for torrent announces and filtering
+  autobrr:
+    image: linuxserver/autobrr
+    container_name: autobrr
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIME_ZONE}
+      - UMASK=022
+    volumes:
+      - ${DIR_MEDIASERVER}/autobrr/config:/config
+    ports:
+      - 7477:7477
+    restart: unless-stopped
+    networks:
+      - mediaserver
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:7477/"]
+      interval: 30s
+      timeout: 5s
+      retries: 20
 
   #Media File Organizer
   filebot:
     image: coppit/filebot
     container_name: filebot
-    restart: always
-    volumes:
-      - ${DIR_MEDIASERVER}/filebot/config:/config
-      - ${DIR_MEDIASERVER}/media:/output
-      - ${DIR_DOWNLOADS}:/input
     environment:
       - PUID=${USER_ID}
       - PGID=${GROUP_ID}
       - TZ=${TIME_ZONE}
+    volumes:
+      - ${DIR_MEDIASERVER}/filebot/config:/config
+      - ${DIR_MEDIASERVER}/media:/output
+      - ${DIR_DOWNLOADS}:/input
+    restart: always
+    networks:
+      - mediaserver
+    healthcheck:
+      test: ["CMD", "bash", "-lc", "echo ok" ]
+      interval: 30s
+      timeout: 5s
+      retries: 20
+
+  # One-time bootstrap container to wire apps together via APIs
+  bootstrap:
+    image: alpine:3.20
+    container_name: bootstrap
+    environment:
+      - TZ=${TIME_ZONE}
+      # URLs (override if needed)
+      - PROWLARR_URL=http://prowlarr:9696
+      - SONARR_URL=http://sonarr:8989
+      - RADARR_URL=http://radarr:7878
+      - LIDARR_URL=http://lidarr:8686
+      - BAZARR_URL=http://bazarr:6767
+      - OMBI_URL=http://ombi:3579
+      - DELUGE_URL=http://deluge:8112
+      # API keys & credentials (supply in docker/.env or a secrets file)
+      - PROWLARR_API_KEY=${PROWLARR_API_KEY}
+      - SONARR_API_KEY=${SONARR_API_KEY}
+      - RADARR_API_KEY=${RADARR_API_KEY}
+      - LIDARR_API_KEY=${LIDARR_API_KEY}
+      - BAZARR_API_KEY=${BAZARR_API_KEY}
+      - OMBI_API_KEY=${OMBI_API_KEY}
+      - DELUGE_PASSWORD=${DELUGE_PASSWORD}
+      # Optional: categories used by arr apps
+      - SONARR_CATEGORY=tv
+      - RADARR_CATEGORY=movies
+      - LIDARR_CATEGORY=music
+      # Optional: FlareSolverr URL to set in Prowlarr (if supported via API)
+      - FLARESOLVERR_URL=http://flaresolverr:8191
+    command: ["/bin/sh","-lc","apk add --no-cache curl jq gettext && chmod +x /scripts/bootstrap.sh && /scripts/bootstrap.sh"]
+    volumes:
+      - "../bash scripts/bootstrap.sh:/scripts/bootstrap.sh:ro"
+      - "./prowlarr:/seed:ro"
+    networks:
+      - mediaserver
+    depends_on:
+      - prowlarr
+      - sonarr
+      - radarr
+      - lidarr
+      - deluge
+      - bazarr
+      - ombi
+    restart: "no"
+
+  # Declarative sync of Sonarr/Radarr settings
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr:latest
+    container_name: recyclarr
+    environment:
+      - TZ=${TIME_ZONE}
+    volumes:
+      - ./recyclarr:/config
+    command: ["recyclarr","sync","--config","/config/recyclarr.yml"]
+    networks:
+      - mediaserver
+    depends_on:
+      - sonarr
+      - radarr
+    restart: "no"

@@ -1,0 +1,17 @@
+{
+  "name": "RuTracker",
+  "implementation": "Rutracker",
+  "configContract": "RutrackerSettings",
+  "protocol": "torrent",
+  "fields": [
+    { "name": "baseUrl", "value": "https://rutracker.org/" },
+    { "name": "type", "value": "semi-private" },
+    { "name": "username", "value": "${RUTRACKER_USERNAME}" },
+    { "name": "password", "value": "${RUTRACKER_PASSWORD}" },
+    { "name": "categories", "value": "1000,2000,3000,4000,5000,7000,8000" }
+  ],
+  "enableRss": true,
+  "enableAutomaticSearch": true,
+  "enableInteractiveSearch": true
+}
+

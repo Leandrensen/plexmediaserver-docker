@@ -1,0 +1,15 @@
+{
+  "name": "BitSearch",
+  "implementation": "BitSearch",
+  "configContract": "BitSearchSettings",
+  "protocol": "torrent",
+  "fields": [
+    { "name": "baseUrl", "value": "https://bitsearch.to/" },
+    { "name": "type", "value": "public" },
+    { "name": "categories", "value": "1000,2000,3000,4000,5000,7000,8000" }
+  ],
+  "enableRss": true,
+  "enableAutomaticSearch": true,
+  "enableInteractiveSearch": true
+}
+

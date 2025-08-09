@@ -1,0 +1,15 @@
+{
+  "name": "Torrentz2nz",
+  "implementation": "Torrentz2",
+  "configContract": "Torrentz2Settings",
+  "protocol": "torrent",
+  "fields": [
+    { "name": "baseUrl", "value": "https://torrentz2.nz/" },
+    { "name": "type", "value": "public" },
+    { "name": "categories", "value": "2000,5000,8000" }
+  ],
+  "enableRss": true,
+  "enableAutomaticSearch": true,
+  "enableInteractiveSearch": true
+}
+

@@ -1,0 +1,35 @@
+version: "3.8"
+
+# Windows/macOS override (Docker Desktop)
+#
+# Why: Plex uses host networking in the main compose, which is not supported on
+# Docker Desktop for Windows or macOS. This override switches Plex to normal
+# bridge networking and maps the required ports explicitly.
+#
+# How to activate (Windows/macOS only):
+#   - Copy/rename this file to: docker-compose.override.yml
+#   - Windows: ensure docker/.env uses Windows paths (e.g., C:/Users/you/...)
+#   - macOS: ensure the media/download paths are shared in Docker Desktop
+#            Settings → Resources → File Sharing
+#   - Run: docker compose up -d
+#
+# On Linux servers, do NOT activate this override; keep Plex on host networking
+# for best performance and discovery.
+
+services:
+  plex:
+    network_mode: null
+    networks:
+      - mediaserver
+    ports:
+      - "32400:32400/tcp"            # Plex Web
+      - "1900:1900/udp"              # DLNA discovery (optional)
+      - "32410-32414:32410-32414/udp"  # GDM (optional)
+      - "32469:32469/tcp"            # DLNA (optional)
+      - "32469:32469/udp"
+
+networks:
+  mediaserver:
+    external: true
+    name: mediaserver
+

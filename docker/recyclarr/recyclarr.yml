@@ -1,0 +1,29 @@
+sonarr:
+  - instance_name: sonarr
+    api_key: ${SONARR_API_KEY}
+    base_url: http://sonarr:8989
+    quality_profiles:
+      - name: HD-1080p
+        qualities:
+          - bluray-1080p
+          - web-1080p
+        upgrade:
+          allowed: true
+    root_folders:
+      - path: /series
+      - path: /anime
+
+radarr:
+  - instance_name: radarr
+    api_key: ${RADARR_API_KEY}
+    base_url: http://radarr:7878
+    quality_profiles:
+      - name: HD-1080p
+        qualities:
+          - bluray-1080p
+          - web-1080p
+        upgrade:
+          allowed: true
+    root_folders:
+      - path: /peliculas
+      - path: /documentales

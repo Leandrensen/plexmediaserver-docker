@@ -1,0 +1,11 @@
+{
+  "name": "FlareSolverr",
+  "implementation": "FlareSolverr",
+  "configContract": "FlareSolverrSettings",
+  "fields": [
+    { "name": "baseUrl", "value": "${FLARESOLVERR_URL}" },
+    { "name": "requestTimeout", "value": 60000 },
+    { "name": "proxy", "value": "" }
+  ]
+}
+

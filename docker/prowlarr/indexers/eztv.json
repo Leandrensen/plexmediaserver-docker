@@ -1,0 +1,15 @@
+{
+  "name": "EZTV",
+  "implementation": "Eztv",
+  "configContract": "EztvSettings",
+  "protocol": "torrent",
+  "fields": [
+    { "name": "baseUrl", "value": "https://eztvx.to/" },
+    { "name": "type", "value": "public" },
+    { "name": "categories", "value": "5000" }
+  ],
+  "enableRss": true,
+  "enableAutomaticSearch": true,
+  "enableInteractiveSearch": true
+}
+
